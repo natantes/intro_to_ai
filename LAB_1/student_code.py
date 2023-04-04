@@ -1,6 +1,6 @@
 import common
 
-height, width = common.constants.MAP_HEIGHT, common.constants.MAP_WIDTH
+HEIGHT, WIDTH = common.constants.MAP_HEIGHT, common.constants.MAP_WIDTH
 starting = [-1, -1]
 
 def df_search(map):
@@ -10,13 +10,13 @@ def df_search(map):
 	# y between 0 and common.constants.MAP_HEIGHT-1
 	# x between 0 and common.constants.MAP_WIDTH-1
 
-	for y in range(height):
-		for x in range(width):
+	for y in range(HEIGHT):
+		for x in range(WIDTH):
 			if map[y][x] == 2:
 				starting[0], starting[1] = y, x
 
 	def dfs(y, x):
-		if 0 <= y < height and 0 <= x < width:
+		if 0 <= y < HEIGHT and 0 <= x < WIDTH:
 			if map[y][x] == 3:
 				visited.add((y, x))
 				return True
@@ -46,14 +46,15 @@ def df_search(map):
 def bf_search(map):
 	found = False;
 	path, queue = [], []
+	visited = set()
 	queue.append(tuple(starting))
 	# PUT YOUR CODE HERE
 	# access the map using "map[y][x]"
 	# y between 0 and common.constants.MAP_HEIGHT-1
 	# x between 0 and common.constants.MAP_WIDTH-1
 
-	for y in range(height):
-		for x in range(width):
+	for y in range(HEIGHT):
+		for x in range(WIDTH):
 			if map[y][x] == 2:
 				starting[0], starting[1] = y, x
 
@@ -63,8 +64,8 @@ def bf_search(map):
 		for _ in range(l):
 			y, x = queue.pop(0)
 
-			if 0 <= y < height and 0 <= x < width:
-				
+			if 0 <= y < HEIGHT and 0 <= x < WIDTH:
+
 				if map[y][x] == 3:
 					visited.add((y, x))
 					found = True
