@@ -3,6 +3,7 @@ import common
 HEIGHT, WIDTH = common.constants.MAP_HEIGHT, common.constants.MAP_WIDTH
 starting = [-1, -1]
 
+
 def df_search(map):
 	found = False
 	visited = set()
@@ -40,11 +41,12 @@ def df_search(map):
 
 	return found
 
+
+
 def bf_search(map):
-	found = False;
-	path, correct_path, queue = [], [], []
-	visited = set()
-	queue.append(tuple([starting[0], starting[1], path]))
+	found = False
+	path, queue, final_path = [], [], []
+	queue.append([[starting[0]], [starting[1]], path])
 
 	for y in range(HEIGHT):
 		for x in range(WIDTH):
@@ -63,23 +65,23 @@ def bf_search(map):
 				path.append((y, x))
 
 				if map[y][x] == 3:
-					correct_path = path
+					final_path = path
 					found = True
 					break
 				
 				elif map[y][x] == 0 or map[y][x] == 2:
 					map[y][x] = 4
 
-					queue.append(([y], [x + 1], path))
-					queue.append(([y + 1], [x], path))
-					queue.append(([y], [x - 1], path))
-					queue.append(([y - 1], [x], path))
-					
+
+					queue.append([[y], [x + 1], list(path)])
+					queue.append([[y + 1], [x], list(path)])
+					queue.append([[y], [x - 1], list(path)])
+					queue.append([[y - 1], [x], list(path)])					
 
 		if found:
 			break
-		
-	for y, x in correct_path:
+	
+	for y, x in final_path:
 		map[y][x] = 5
 
 	return found
