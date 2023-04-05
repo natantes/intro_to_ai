@@ -142,6 +142,15 @@ gold_bf3 = ("4444444444"
   "4414441031"
   "1444141001")
 
+data4 = ("20"
+	 "13")
+			  
+gold_df4 = ("55"
+	    "15")
+					 
+gold_bf4 = ("55"
+	    "15")
+
 all_passed = True
 
 gold_dfmap1 = common.init_map();
@@ -230,3 +239,5 @@ if not bf3:
 else:
 	print( bcolors.RED+"wrong return value"+bcolors.NORMAL)
 print("\n\r")
+
+all_passed = all_passed and cdf2 and cbf2 and df2 and bf2 
