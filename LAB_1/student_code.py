@@ -4,7 +4,7 @@ import common
 HEIGHT, WIDTH = common.constants.MAP_HEIGHT, common.constants.MAP_WIDTH
 starting = [-1, -1]
 
-
+# DFS
 def df_search(map):
 	found = False
 	visited = set()
