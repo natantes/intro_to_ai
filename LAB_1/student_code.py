@@ -1,5 +1,6 @@
 import common
 
+# Constants
 HEIGHT, WIDTH = common.constants.MAP_HEIGHT, common.constants.MAP_WIDTH
 starting = [-1, -1]
 
