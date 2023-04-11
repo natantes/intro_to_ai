@@ -54,6 +54,7 @@ def choose_queen(board):
 				queens.append([new_best, x, [y, x], new_choice])
 	
 	queens.sort(key=lambda x: (x[0], -x[1]), reverse=True)
+	print(queens)
 	return queens[0] if queens else None
 
 def potential_difference(board, queen, old_count):
