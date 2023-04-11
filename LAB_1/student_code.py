@@ -43,15 +43,8 @@ def df_search(map):
 	return found
 
 
-
+# BFS
 def bf_search(map):
-	store = []
-	for _ in range(HEIGHT):
-		current = []
-		for _ in range(WIDTH):
-			current.append([])
-		store.append(current)
-
 	found = False
 	path, queue, final_path = [], [], []
 	queue.append([[starting[0]], [starting[1]], path])
@@ -71,7 +64,6 @@ def bf_search(map):
 
 			if 0 <= y < HEIGHT and 0 <= x < WIDTH:
 				path.append((y, x))
-				# store[y][x] = list(path)
 
 				if map[y][x] == 3:
 					final_path = path
@@ -81,11 +73,12 @@ def bf_search(map):
 				elif map[y][x] == 0 or map[y][x] == 2:
 					map[y][x] = 4
 
+
 					queue.append([[y], [x + 1], list(path)])
 					queue.append([[y + 1], [x], list(path)])
 					queue.append([[y], [x - 1], list(path)])
-					queue.append([[y - 1], [x], list(path)])				
-					
+					queue.append([[y - 1], [x], list(path)])					
+
 		if found:
 			break
 	
