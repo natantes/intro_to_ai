@@ -3,6 +3,7 @@ import common
 HEIGHT, WIDTH = common.constants.MAP_HEIGHT, common.constants.MAP_WIDTH
 starting = [-1, -1]
 
+
 def df_search(map):
 	found = False
 	visited = set()
@@ -40,6 +41,8 @@ def df_search(map):
 
 	return found
 
+
+
 def bf_search(map):
 	store = []
 	for _ in range(HEIGHT):
@@ -48,8 +51,8 @@ def bf_search(map):
 			current.append([])
 		store.append(current)
 
-	found = False;
-	path, correct_path, queue = [], [], []
+	found = False
+	path, queue, final_path = [], [], []
 	queue.append([[starting[0]], [starting[1]], path])
 
 	for y in range(HEIGHT):
@@ -70,7 +73,7 @@ def bf_search(map):
 				# store[y][x] = list(path)
 
 				if map[y][x] == 3:
-					correct_path = path
+					final_path = path
 					found = True
 					break
 				
@@ -80,15 +83,12 @@ def bf_search(map):
 					queue.append([[y], [x + 1], list(path)])
 					queue.append([[y + 1], [x], list(path)])
 					queue.append([[y], [x - 1], list(path)])
-					queue.append([[y - 1], [x], list(path)])
+					queue.append([[y - 1], [x], list(path)])				
 					
 		if found:
 			break
-		
-	for y, x in correct_path:
+	
+	for y, x in final_path:
 		map[y][x] = 5
-
-	for row in store:
-		print(row)
 
 	return found
