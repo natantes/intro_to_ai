@@ -1,94 +1,79 @@
 import common
 
-HEIGHT, WIDTH = common.constants.MAP_HEIGHT, common.constants.MAP_WIDTH
-starting = [-1, -1]
+def df_search_2(map):
 
-
-def df_search(map):
 	found = False
-	visited = set()
 
-	for y in range(HEIGHT):
-		for x in range(WIDTH):
-			if map[y][x] == 2:
-				starting[0], starting[1] = y, x
+	for i in range(common.constants.MAP_HEIGHT - 1):
+		for j in range(common.constants.MAP_WIDTH - 1):
+			if map[i][j] == 2:
+				start = (i, j)
+				stack = [start]
 
-	def dfs(y, x):
-		if 0 <= y < HEIGHT and 0 <= x < WIDTH:
-			if map[y][x] == 3:
-				visited.add((y, x))
-				return True
-			
-			elif map[y][x] == 0 or map[y][x] == 2:
-				map[y][x] = 4
+	path = {start: [start]}
 
-				local_found = False
-				visited.add((y, x))
+	while len(stack) > 0:
+		current = stack.pop()
+		y, x = current[0], current[1]
+		if map[y][x] == 3:
+			for i in path[(y, x)]:
+				map[i[0]][i[1]] = 5
+			return True
+		map[y][x] = 4
 
-				local_found = dfs(y, x + 1) or dfs(y + 1, x) or dfs(y, x - 1) or dfs(y - 1, x)
+		if y > 0 and map[y-1][x] != 1 and map[y-1][x] != 4:
+			stack.append((y-1, x))
+			path[(y-1, x)] = path[current] + [(y-1, x)]
 
-				if local_found: 
-					return True
-				
-				visited.remove((y, x))
+		if x > 0 and map[y][x-1] != 1 and map[y][x-1] != 4:
+			stack.append((y, x-1))
+			path[(y, x-1)] = path[current] + [(y, x-1)]
 
-		return False
+		if y < common.constants.MAP_HEIGHT - 1 and map[y+1][x] != 1 and map[y+1][x] != 4:
+			stack.append((y+1, x))
+			path[(y+1, x)] = path[current] + [(y+1, x)]
 
-	found = dfs(starting[0], starting[1])
-
-	for y, x in visited:
-		map[y][x] = 5
+		if x < common.constants.MAP_WIDTH - 1 and map[y][x + 1] != 1 and map[y][x + 1] != 4:
+			stack.append((y, x+1))
+			path[(y, x+1)] = path[current] + [(y, x+1)]
 
 	return found
 
-
-
-def bf_search(map):
-	store = []
-	for _ in range(HEIGHT):
-		current = []
-		for _ in range(WIDTH):
-			current.append([])
-		store.append(current)
+def bf_search_2(map):
 
 	found = False
-	path, queue, final_path = [], [], []
-	queue.append([[starting[0]], [starting[1]], path])
 
-	for y in range(HEIGHT):
-		for x in range(WIDTH):
-			if map[y][x] == 2:
-				starting[0], starting[1] = y, x
+	for i in range(common.constants.MAP_HEIGHT - 1):
+		for j in range(common.constants.MAP_WIDTH - 1):
+			if map[i][j] == 2:
+				start = (i, j)
+				queue = [start]
 
-	while queue:
-		l = len(queue)
+	path = {start: [start]}
 
-		for _ in range(l):
-			y, x, path = queue.pop(0)
-			y = y[0]
-			x = x[0]
+	while len(queue) > 0:
+		current = queue.pop(0)
+		y, x = current[0], current[1]
+		if map[y][x] == 3:
+			for i in path[(y, x)]:
+				map[i[0]][i[1]] = 5
+			return True
+		map[y][x] = 4
 
-			if 0 <= y < HEIGHT and 0 <= x < WIDTH:
-				path.append((y, x))
-				# store[y][x] = list(path)
+		if x < common.constants.MAP_WIDTH - 1 and map[y][x+1] != 1 and map[y][x+1] != 4:
+			queue.append((y, x+1))
+			path[(y, x+1)] = path[current] + [(y, x+1)]
 
-				if map[y][x] == 3:
-					final_path = path
-					found = True
-					break
-				
-				elif map[y][x] == 0 or map[y][x] == 2:
-					map[y][x] = 4
+		if y < common.constants.MAP_HEIGHT - 1 and map[y+1][x] != 1 and map[y+1][x] != 4:
+			queue.append((y+1, x))
+			path[(y+1, x)] = path[current] + [(y+1, x)]
 
-					queue.append([[y], [x + 1], list(path)])
-					queue.append([[y + 1], [x], list(path)])
-					queue.append([[y], [x - 1], list(path)])
-					queue.append([[y - 1], [x], list(path)])				
-					
-		if found:
-			break
-	
-	for y, x in final_path:
-		map[y][x] = 5
+		if x > 0 and map[y][x-1] != 1 and map[y][x-1] != 4:
+			queue.append((y, x-1))
+			path[(y, x-1)] = path[current] + [(y, x-1)]
+
+		if y > 0 and map[y-1][x] != 1 and map[y-1][x] != 4:
+			queue.append((y-1, x))
+			path[(y-1, x)] = path[current] + [(y-1, x)]
 
 	return found
