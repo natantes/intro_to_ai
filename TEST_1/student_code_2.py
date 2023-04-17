@@ -1,79 +1,87 @@
-import common
+QUEENS = 10
 
-def df_search_2(map):
+def num_attack(board):
 
-	found = False
+    row_attack = 0
+    queen_pos = []
 
-	for i in range(common.constants.MAP_HEIGHT - 1):
-		for j in range(common.constants.MAP_WIDTH - 1):
-			if map[i][j] == 2:
-				start = (i, j)
-				stack = [start]
+    for y in range(10):
+        queen = 0
+        for x in range(10):
+            if board[y][x] == 1:
+                queen = queen + 1
+                queen_pos.append((y, x))
 
-	path = {start: [start]}
+        if queen > 1:
+            while queen > 1:
+                row_attack = row_attack + queen - 1
+                queen = queen - 1
 
-	while len(stack) > 0:
-		current = stack.pop()
-		y, x = current[0], current[1]
-		if map[y][x] == 3:
-			for i in path[(y, x)]:
-				map[i[0]][i[1]] = 5
-			return True
-		map[y][x] = 4
+    d_attack = 0
 
-		if y > 0 and map[y-1][x] != 1 and map[y-1][x] != 4:
-			stack.append((y-1, x))
-			path[(y-1, x)] = path[current] + [(y-1, x)]
+    for q1 in queen_pos:
+        for q2 in queen_pos:
+            if q2[0] > q1[0] and q2[1] > q1[1] and ((q2[0] - q1[0]) == (q2[1] - q1[1])):
+                d_attack = d_attack + 1
+            if q2[0] < q1[0] and q2[1] > q1[1] and ((q1[0] - q2[0]) == (q2[1] - q1[1])):
+                d_attack = d_attack + 1
 
-		if x > 0 and map[y][x-1] != 1 and map[y][x-1] != 4:
-			stack.append((y, x-1))
-			path[(y, x-1)] = path[current] + [(y, x-1)]
+    attack = row_attack + d_attack
 
-		if y < common.constants.MAP_HEIGHT - 1 and map[y+1][x] != 1 and map[y+1][x] != 4:
-			stack.append((y+1, x))
-			path[(y+1, x)] = path[current] + [(y+1, x)]
+    return attack
 
-		if x < common.constants.MAP_WIDTH - 1 and map[y][x + 1] != 1 and map[y][x + 1] != 4:
-			stack.append((y, x+1))
-			path[(y, x+1)] = path[current] + [(y, x+1)]
+def gradient_search_2(board):
 
-	return found
+    if num_attack(board) == 0:
+        return True
 
-def bf_search_2(map):
+    else:
+        # record the max deduction of column x
+        deduction = []
+        # record the y_pos that results in the max deduction of column x
+        y_pos = []
+        # record the previous number of attacks
+        prev_attack = num_attack(board)
 
-	found = False
+        for x in range(10):
+            deduction_at_x = []
 
-	for i in range(common.constants.MAP_HEIGHT - 1):
-		for j in range(common.constants.MAP_WIDTH - 1):
-			if map[i][j] == 2:
-				start = (i, j)
-				queue = [start]
+            # find original queen location and remove it at column x
+            for y in range(10):
+                if board[y][x] == 1:
+                    original_y = y
+                    board[original_y][x] = 0
 
-	path = {start: [start]}
+            # move the original queen
+            for y in range(10):
 
-	while len(queue) > 0:
-		current = queue.pop(0)
-		y, x = current[0], current[1]
-		if map[y][x] == 3:
-			for i in path[(y, x)]:
-				map[i[0]][i[1]] = 5
-			return True
-		map[y][x] = 4
+                # start with the first entry
+                board[y][x] = 1
+                deduction_at_x.append(prev_attack - num_attack(board))
+                # return to all 0s
+                board[y][x] = 0
 
-		if x < common.constants.MAP_WIDTH - 1 and map[y][x+1] != 1 and map[y][x+1] != 4:
-			queue.append((y, x+1))
-			path[(y, x+1)] = path[current] + [(y, x+1)]
+            board[original_y][x] = 1
 
-		if y < common.constants.MAP_HEIGHT - 1 and map[y+1][x] != 1 and map[y+1][x] != 4:
-			queue.append((y+1, x))
-			path[(y+1, x)] = path[current] + [(y+1, x)]
+            deduction.append(max(deduction_at_x))
+            y_pos.append(deduction_at_x.index(max(deduction_at_x)))
 
-		if x > 0 and map[y][x-1] != 1 and map[y][x-1] != 4:
-			queue.append((y, x-1))
-			path[(y, x-1)] = path[current] + [(y, x-1)]
+        if max(deduction) == 0:
+            return False
+        else:
+            moved_x = deduction.index(max(deduction))
+            moved_y = y_pos[moved_x]
+            for y in range(10):
+                board[y][moved_x] = 0
+            board[moved_y][moved_x] = 1
+            # for row in board:
+            #     print(row)
+            # print('---------------')
+            return(gradient_search(board))
 
-		if y > 0 and map[y-1][x] != 1 and map[y-1][x] != 4:
-			queue.append((y-1, x))
-			path[(y-1, x)] = path[current] + [(y-1, x)]
 
-	return found
+# print(gradient_search([[0,0,0,0,0,0,0,0,0,0], [1,0,0,0,0,0,0,0,0,0], [0,1,0,0,1,0,0,0,0,0], [0,0,1,0,0,1,0,0,1,0],
+#                  [0,0,0,0,0,0,0,1,0,0], [0,0,0,1,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0],
+#                  [0,0,0,0,0,0,1,0,0,0], [0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,1]]))
+
+
