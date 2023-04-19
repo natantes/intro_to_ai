@@ -1,51 +1,44 @@
 import common
 
-def max_board(board):
+translate = [0, 1, 0, 1, -1, 2]
+
+def max_board(board, a=float("-inf"), b=float("inf"), alpha_beta_pruning=False):
 	current_state = common.game_status(board)
-	if current_state:
-		return current_state
-	elif all(board):
-		return common.constants.NONE
+	if current_state or all(board): return translate[current_state + 2]
+	
 	v = float("-inf")
 	for index in range(9):
-		row, col = index // 3, index % 3
-		if common.get_cell(board, row, col) == 0:
-			common.set_cell(board, row, col, 1)
-			v = max(v, min_board(list(board)))
-			common.set_cell(board, row, col, 0)
+		if common.get_cell(board, index // 3, index % 3) == 0:
+			common.set_cell(board, index // 3, index % 3, 1)
+			if alpha_beta_pruning:
+				v = max(v, min_board(list(board), a, b, True))
+				if v >= b: return v
+				a = max(a, v)
+			else:
+				v = max(v, min_board(list(board)))
+			common.set_cell(board, index // 3, index % 3, 0)
 	return v
 
-def min_board(board):
+
+def min_board(board, a=float("-inf"), b=float("inf"), alpha_beta_pruning=False):
 	current_state = common.game_status(board)
-	if current_state:
-		return current_state
-	elif all(board):
-		return common.constants.NONE
+	if current_state or all(board): return translate[current_state + 2]
+
 	v = float("inf")
 	for index in range(9):
-		row, col = index // 3, index % 3
-		if common.get_cell(board, row, col) == 0:
-			common.set_cell(board, row, col, 2)
-			v = min(v, max_board(list(board)))
-			common.set_cell(board, row, col, 0)
+		if common.get_cell(board, index // 3, index % 3) == 0:
+			common.set_cell(board, index // 3, index % 3, 2)
+			if alpha_beta_pruning:
+				v = min(v, max_board(list(board), a, b, True))
+				if v <= a: return v
+				b = min(b, v)
+			else:
+				v = min(v, max_board(list(board)))
+			common.set_cell(board, index // 3, index % 3, 0)
 	return v
 
-	#it must return common.constants.X(1), common.constants.O(2) or common.constants.NONE(0) for tie.
-	#use the function common.game_status(board), to evaluate a board
-	#it returns common.constants.X(1) if X wins, common.constants.O(2) if O wins or common.constants.NONE(0) if tie or game is not finished
-	#the program will keep track of the number of boards evaluated
-	#result = common.game_status(board);
-
 def minmax_tictactoe(board, turn):
-	if turn == 1: return max_board(board)
-	return min_board(board)
+	return translate[max_board(board)] if turn == 1 else translate[min_board(board)]
 
 def abprun_tictactoe(board, turn):
-	#put your code here:
-	#it must return common.constants.X(1), common.constants.O(2) or common.constants.NONE(0) for tie.
-	#use the function common.game_status(board), to evaluate a board
-	#it returns common.constants.X(1) if X wins, common.constants.O(2) if O wins or common.constants.NONE(0) if tie or game is not finished
-	#the program will keep track of the number of boards evaluated
-	#result = common.game_status(board);
-	return None
-	# return common.constants.NONE
+	return translate[max_board(board, alpha_beta_pruning=True)] if turn == 1 else translate[min_board(board, alpha_beta_pruning=True)]
