@@ -2,13 +2,12 @@ import common
 
 translate = [0, 1, 0, 1, -1, 2]
 
-def max_board(board, a=float("-inf"), b=float("inf"), a_b_pruning=False):
+def max_board(board, a=float("-inf"), b=float("inf"), a_b_pruning=False, v=float("-inf")):
 	current_state = common.game_status(board)
 	if current_state or all(board): return translate[current_state + 2]
 	
-	v = float("-inf")
 	for index in range(9):
-		if common.get_cell(board, index // 3, index % 3) == 0:
+		if not common.get_cell(board, index // 3, index % 3):
 			common.set_cell(board, index // 3, index % 3, 1)
 			if a_b_pruning:
 				v = max(v, min_board(list(board), a, b, True))
@@ -19,14 +18,12 @@ def max_board(board, a=float("-inf"), b=float("inf"), a_b_pruning=False):
 			common.set_cell(board, index // 3, index % 3, 0)
 	return v
 
-
-def min_board(board, a=float("-inf"), b=float("inf"), a_b_pruning=False):
+def min_board(board, a=float("-inf"), b=float("inf"), a_b_pruning=False, v=float("inf")):
 	current_state = common.game_status(board)
 	if current_state or all(board): return translate[current_state + 2]
 
-	v = float("inf")
 	for index in range(9):
-		if common.get_cell(board, index // 3, index % 3) == 0:
+		if not common.get_cell(board, index // 3, index % 3):
 			common.set_cell(board, index // 3, index % 3, 2)
 			if a_b_pruning:
 				v = min(v, max_board(list(board), a, b, True))
