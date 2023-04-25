@@ -66,3 +66,6 @@ def gradient_search(board):
 		_, _, old_pos, new_pos = queen
 		board[old_pos[0]][old_pos[1]] = 0
 		board[new_pos[0]][new_pos[1]] = 1
+		for row in board:
+			print(row)
+		print("================")

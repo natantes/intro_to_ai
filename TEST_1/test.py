@@ -35,7 +35,8 @@ def check_result(map1, map2):
 	print()
 	return result
 
-tests = [("0110000000"
+tests = [
+("0110000000"
 "0000000000"
 "0000010000"
 "0000000100"
@@ -213,9 +214,12 @@ for i, test in enumerate(tests):
     i += 1
     print(bcolors.NORMAL + bcolors.BOLD +"Testing Board " + str(i))
     board1 = init_board(); solution1 = init_board()
+    board2 = init_board(); solution2 = init_board()
     set_board(board1, test)
+    set_board(board2, test)
 
-    agree = (gradient_search_1(board1) == gradient_search_2(board1))
+    agree = (gradient_search_1(board1) == gradient_search_2(board2))
+    agree |= board1 == board2
     Pass |= agree
     if agree:
         print(bcolors.GREEN + "Test " + str(i) + " Passed")

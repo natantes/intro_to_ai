@@ -74,10 +74,7 @@ def gradient_search_2(board):
             for y in range(10):
                 board[y][moved_x] = 0
             board[moved_y][moved_x] = 1
-            # for row in board:
-            #     print(row)
-            # print('---------------')
-            return(gradient_search(board))
+            return(gradient_search_2(board))
 
 
 # print(gradient_search([[0,0,0,0,0,0,0,0,0,0], [1,0,0,0,0,0,0,0,0,0], [0,1,0,0,1,0,0,0,0,0], [0,0,1,0,0,1,0,0,1,0],

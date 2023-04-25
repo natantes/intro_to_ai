@@ -1,3 +1,5 @@
+
+
 directions = [[-1, 0], [0, 1], [1, 0], [0, -1]]
 number_locations = {}
 
@@ -101,3 +103,4 @@ def print_board(board):
         "{:02d}".format(board[8]),
     )
     print("------------")
+
