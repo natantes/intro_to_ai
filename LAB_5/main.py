@@ -128,21 +128,21 @@ data6 = ("921786453"
 
 print ("Board 1")
 exp1 = run_experiment(data1, 3448, 1078)
-# print ("Board 2")
-# exp2 = run_experiment(data2, 21819, 2815)
-# print ("Board 3")
-# exp3 = run_experiment(data3, 4209, 334)
-# print ("Board 4")
-# exp4 = run_experiment(data4, 655, 235)
-# print ("Board 5")
-# exp5 = run_experiment(data5, 22, 20)
-# print ("Board 6")
-# exp5 = run_experiment(data6, 1, 1)
+print ("Board 2")
+exp2 = run_experiment(data2, 21819, 2815)
+print ("Board 3")
+exp3 = run_experiment(data3, 4209, 334)
+print ("Board 4")
+exp4 = run_experiment(data4, 655, 235)
+print ("Board 5")
+exp5 = run_experiment(data5, 22, 20)
+print ("Board 6")
+exp5 = run_experiment(data6, 1, 1)
 
-# all_passed = exp1 and exp2 and exp3 and exp4 and exp5 
+all_passed = exp1 and exp2 and exp3 and exp4 and exp5 
 
 
-# if all_passed:
-# 	exit(0)
-# else:
-# 	exit(1)
+if all_passed:
+	exit(0)
+else:
+	exit(1)
