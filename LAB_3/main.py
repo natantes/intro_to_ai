@@ -1,6 +1,3 @@
-import time
-start_time = time.time()
-
 import student_code
 import copy
 
@@ -307,5 +304,4 @@ else:
 print("\n\n\n\n----------------------------")
 print("your program has passed ",grade," out of 21 tests")
 
-print("--- %s seconds ---" % (time.time() - start_time))
 

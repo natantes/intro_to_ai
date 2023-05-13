@@ -14,7 +14,7 @@ def max_board(board, a=float("-inf"), b=float("inf"), a_b_pruning=False, v=float
 				if v >= b: return v
 				a = max(a, v)
 			else:
-				v = max(v, min_board(list(board)))
+				v = max(v, min_board(board))
 			common.set_cell(board, index // 3, index % 3, 0)
 	return v
 
@@ -30,7 +30,7 @@ def min_board(board, a=float("-inf"), b=float("inf"), a_b_pruning=False, v=float
 				if v <= a: return v
 				b = min(b, v)
 			else:
-				v = min(v, max_board(list(board)))
+				v = min(v, max_board(board))
 			common.set_cell(board, index // 3, index % 3, 0)
 	return v
 

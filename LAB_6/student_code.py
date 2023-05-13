@@ -1,73 +1,86 @@
 import common
+import time
+
+actions = [
+    (common.constants.SOFF, 1, 0, 1),
+    (common.constants.WOFF, 0, -1, 1),
+    (common.constants.NOFF, -1, 0, 1),
+    (common.constants.EOFF, 0, 1, 1)]
+special_actions = [
+    (common.constants.SON, 1, 0, 2),
+    (common.constants.WON, 0, -1, 2),
+    (common.constants.NON, -1, 0, 2),
+    (common.constants.EON, 0, 1, 2),
+]
+
+def best_move(prob, current_actions, battery_drop_cost, discount, current_values, y, x):
+    best_value, best_policy, result = float('-inf'), common.constants.EXIT, 0
+
+    for i in range(4):
+        current_action, left_action, right_action = current_actions[i], current_actions[(i - 1) % 4], current_actions[(i + 1) % 4]
+        choices = [current_action, left_action, right_action]
+
+        expected_value = 0
+
+        for p, action in zip(prob, choices):
+            _, dy, dx, mulitplier = action
+            next_x, next_y = x + dx, y + dy
+
+            if 0 <= next_x < 6 and 0 <= next_y < 6:
+                expected_value += p * (-battery_drop_cost * mulitplier + discount * current_values[next_y][next_x])
+            else:
+                expected_value += p * (-battery_drop_cost * mulitplier + discount * current_values[y][x])
+
+        if expected_value > best_value:
+            best_value = expected_value
+            best_policy = current_action[0]
+    
+    return best_value, best_policy
+
+def find_delta(values, new_values):
+    delta = float("-inf")
+    for y in range(6):
+        for x in range(6):
+            delta = max(delta, abs(new_values[y][x] - values[y][x]))
+    return delta
 
 def drone_flight_planner(map, policies, values, delivery_fee, battery_drop_cost, dronerepair_cost, discount):
-    actions = [
-        (common.constants.SOFF, 1, 0, 1),
-        (common.constants.WOFF, 0, -1, 1),
-        (common.constants.NOFF, -1, 0, 1),
-        (common.constants.EOFF, 0, 1, 1),
-        (common.constants.SON, 1, 0, 2),
-        (common.constants.WON, 0, -1, 2),
-        (common.constants.NON, -1, 0, 2),
-        (common.constants.EON, 0, 1, 2),
-    ]
+    start_time = time.time()
+    current_values = list(values)
 
-    def is_valid(x, y):
-        return 0 <= x < 6 and 0 <= y < 6
-
-    def transition(state, action, cost):
-        x, y = state
-        dx, dy, energy_cost = action
-
-        next_x = x + dx
-        next_y = y + dy
-
-        if not is_valid(next_x, next_y):
-            return (x, y, cost + battery_drop_cost * energy_cost)
-
-        if map[next_y][next_x] == common.constants.RIVAL:
-            return (x, y, cost - dronerepair_cost)
-
-        if map[next_y][next_x] == common.constants.CUSTOMER:
-            return (x, y, cost + delivery_fee)
-
-        return (next_x, next_y, cost + battery_drop_cost * energy_cost)
-
-    def bellman_update(x, y):
-        if map[y][x] == common.constants.RIVAL or map[y][x] == common.constants.CUSTOMER:
-            return values[y][x], policies[y][x]
-
-        best_value = float('-inf')
-        best_policy = common.constants.EXIT
-
-        for action in actions:
-            action_value = 0
-            expected_value = 0
-
-            for prob, dx, dy in [(0.7, *action[1:3]), (0.15, -action[2], action[1]), (0.15, action[2], -action[1])]:
-                next_x, next_y, cost = transition((x, y), (dx, dy, action[3]), 0)
-                action_value += prob * (cost + discount * values[next_y][next_x])
-
-            if action_value > best_value:
-                best_value = action_value
-                best_policy = action[0]
-
-        return best_value, best_policy
-
-    epsilon = 1e-5
-    while True:
-        delta = 0
+    def bellman_update(current_values):
+        new_values = [[0 for _ in range(6)] for _ in range(6)]
 
         for y in range(6):
             for x in range(6):
-                new_value, new_policy = bellman_update(x, y)
 
-                delta = max(delta, abs(values[y][x] - new_value))
-                values[y][x] = new_value
-                policies[y][x] = new_policy
+                if map[y][x] == common.constants.RIVAL:
+                    new_values[y][x] = -dronerepair_cost
+                elif map[y][x] == common.constants.CUSTOMER:
+                    new_values[y][x] = delivery_fee
+                else:
+                    expected_value1, best_policy1 = best_move([0.7, 0.15, 0.15], actions, battery_drop_cost, discount, current_values, y, x)
+                    expected_value2, best_policy2 = best_move([0.8, 0.10, 0.10], special_actions, battery_drop_cost, discount, current_values, y, x)
+
+                    new_values[y][x] = expected_value1 if expected_value1 > expected_value2 else expected_value2
+                    policies[y][x] = best_policy1 if expected_value1 > expected_value2 else best_policy2
+
+        return new_values
+
+    epsilon = 1e-30
+    while True:
+        new_values = bellman_update(current_values)
+        delta = find_delta(current_values, new_values)
+        current_values = list(new_values)
 
         if delta < epsilon:
             break
 
-    return values[0][0]
+    for y in range(6):
+        for x in range(6):
+            values[y][x] = current_values[y][x]
+            if map[y][x] == common.constants.PIZZA:
+                result = values[y][x]
 
+    print("--- %s seconds ---" % (time.time() - start_time))
+    return result
