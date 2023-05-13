@@ -25,8 +25,8 @@ def detect_slope_intercept(image):
 
 def detect_circles(image):
     space = common.init_space(common.constants.HEIGHT, common.constants.WIDTH)
-    r = 30  
-    threshold = 60 
+    r, circles = 30, 0
+    threshold = 2 * math.pi * r
     for y in range(common.constants.HEIGHT):
         for x in range(common.constants.WIDTH):
             if image[y][x] == 0:  
@@ -36,14 +36,8 @@ def detect_circles(image):
                     if 0 <= a < common.constants.WIDTH and 0 <= b < common.constants.HEIGHT:
                         space[int(b)][int(a)] += 1
 
-    circles = 0
     for y in range(1, len(space)):  
         for x in range(1, len(space[y])):  
-            if (space[y][x] > threshold and
-                space[y][x] > space[y-1][x] and
-                space[y][x] > space[y+1][x] and
-                space[y][x] > space[y][x-1] and
-                space[y][x] > space[y][x+1]):
-                circles += 1
+            circles += space[y][x] > threshold
     return circles
 				
