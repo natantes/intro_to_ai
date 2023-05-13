@@ -1,29 +1,29 @@
 import common
-import time
 
 actions = [
-    (common.constants.SOFF, 1, 0, 1),
-    (common.constants.WOFF, 0, -1, 1),
-    (common.constants.NOFF, -1, 0, 1),
-    (common.constants.EOFF, 0, 1, 1)]
+    (common.constants.SOFF, 1, 0, 1, [0.7, 0.15, 0.15], [0, 1]),
+    (common.constants.WOFF, 0, -1, 1, [0.7, 0.15, 0.15], [0, 2]),
+    (common.constants.NOFF, -1, 0, 1, [0.7, 0.15, 0.15], [0, 3]),
+    (common.constants.EOFF, 0, 1, 1, [0.7, 0.15, 0.15], [0, 4])]
 special_actions = [
-    (common.constants.SON, 1, 0, 2),
-    (common.constants.WON, 0, -1, 2),
-    (common.constants.NON, -1, 0, 2),
-    (common.constants.EON, 0, 1, 2),
+    (common.constants.SON, 1, 0, 2, [0.8, 0.10, 0.10], [1, 1]),
+    (common.constants.WON, 0, -1, 2, [0.8, 0.10, 0.10], [1, 2]),
+    (common.constants.NON, -1, 0, 2, [0.8, 0.10, 0.10], [1, 3]),
+    (common.constants.EON, 0, 1, 2, [0.8, 0.10, 0.10], [1, 4]),
 ]
 
-def best_move(prob, current_actions, battery_drop_cost, discount, current_values, y, x):
-    best_value, best_policy, result = float('-inf'), common.constants.EXIT, 0
+def calculator(current_actions, battery_drop_cost, discount, current_values, y, x):
+    analyzer = []
 
     for i in range(4):
         current_action, left_action, right_action = current_actions[i], current_actions[(i - 1) % 4], current_actions[(i + 1) % 4]
         choices = [current_action, left_action, right_action]
+        policy, _, _, _, prob, rank = current_actions[i]
 
         expected_value = 0
 
         for p, action in zip(prob, choices):
-            _, dy, dx, mulitplier = action
+            _, dy, dx, mulitplier, _, rank = action
             next_x, next_y = x + dx, y + dy
 
             if 0 <= next_x < 6 and 0 <= next_y < 6:
@@ -31,11 +31,16 @@ def best_move(prob, current_actions, battery_drop_cost, discount, current_values
             else:
                 expected_value += p * (-battery_drop_cost * mulitplier + discount * current_values[y][x])
 
-        if expected_value > best_value:
-            best_value = expected_value
-            best_policy = current_action[0]
+        analyzer.append([expected_value, rank, policy])
+
+    return analyzer
+
+def best_move(battery_drop_cost, discount, current_values, y, x):
+    analyzer = calculator(actions, battery_drop_cost, discount, current_values, y, x) + calculator(special_actions, battery_drop_cost, discount, current_values, y, x)
+
+    analyzer.sort(key=lambda x: (-x[0], x[1][0], x[1][1]))
     
-    return best_value, best_policy
+    return analyzer[0][0], analyzer[0][2]
 
 def find_delta(values, new_values):
     delta = float("-inf")
@@ -45,7 +50,6 @@ def find_delta(values, new_values):
     return delta
 
 def drone_flight_planner(map, policies, values, delivery_fee, battery_drop_cost, dronerepair_cost, discount):
-    start_time = time.time()
     current_values = list(values)
 
     def bellman_update(current_values):
@@ -59,15 +63,14 @@ def drone_flight_planner(map, policies, values, delivery_fee, battery_drop_cost,
                 elif map[y][x] == common.constants.CUSTOMER:
                     new_values[y][x] = delivery_fee
                 else:
-                    expected_value1, best_policy1 = best_move([0.7, 0.15, 0.15], actions, battery_drop_cost, discount, current_values, y, x)
-                    expected_value2, best_policy2 = best_move([0.8, 0.10, 0.10], special_actions, battery_drop_cost, discount, current_values, y, x)
+                    expected_value, best_policy = best_move(battery_drop_cost, discount, current_values, y, x)
 
-                    new_values[y][x] = expected_value1 if expected_value1 > expected_value2 else expected_value2
-                    policies[y][x] = best_policy1 if expected_value1 > expected_value2 else best_policy2
+                    new_values[y][x] = expected_value
+                    policies[y][x] = best_policy
 
         return new_values
 
-    epsilon = 1e-30
+    epsilon = 1e-15
     while True:
         new_values = bellman_update(current_values)
         delta = find_delta(current_values, new_values)
@@ -82,5 +85,4 @@ def drone_flight_planner(map, policies, values, delivery_fee, battery_drop_cost,
             if map[y][x] == common.constants.PIZZA:
                 result = values[y][x]
 
-    print("--- %s seconds ---" % (time.time() - start_time))
     return result
