@@ -70,7 +70,7 @@ def drone_flight_planner(map, policies, values, delivery_fee, battery_drop_cost,
 
         return new_values
 
-    epsilon = 1e-15
+    epsilon = 0.0000000000001
     while True:
         new_values = bellman_update(current_values)
         delta = find_delta(current_values, new_values)
