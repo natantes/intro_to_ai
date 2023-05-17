@@ -1,15 +1,15 @@
 import common
 
 actions = [
-    (common.constants.SOFF, 1, 0, 1, [0.7, 0.15, 0.15], [0, 1]),
-    (common.constants.WOFF, 0, -1, 1, [0.7, 0.15, 0.15], [0, 2]),
-    (common.constants.NOFF, -1, 0, 1, [0.7, 0.15, 0.15], [0, 3]),
-    (common.constants.EOFF, 0, 1, 1, [0.7, 0.15, 0.15], [0, 4])]
+    (common.constants.SOFF, 1, 0, 1, [0.7, 0.15, 0.15], [1]),
+    (common.constants.WOFF, 0, -1, 1, [0.7, 0.15, 0.15], [2]),
+    (common.constants.NOFF, -1, 0, 1, [0.7, 0.15, 0.15], [3]),
+    (common.constants.EOFF, 0, 1, 1, [0.7, 0.15, 0.15], [4])]
 special_actions = [
-    (common.constants.SON, 1, 0, 2, [0.8, 0.10, 0.10], [1, 1]),
-    (common.constants.WON, 0, -1, 2, [0.8, 0.10, 0.10], [1, 2]),
-    (common.constants.NON, -1, 0, 2, [0.8, 0.10, 0.10], [1, 3]),
-    (common.constants.EON, 0, 1, 2, [0.8, 0.10, 0.10], [1, 4]),
+    (common.constants.SON, 1, 0, 2, [0.8, 0.10, 0.10], [5]),
+    (common.constants.WON, 0, -1, 2, [0.8, 0.10, 0.10], [6]),
+    (common.constants.NON, -1, 0, 2, [0.8, 0.10, 0.10], [7]),
+    (common.constants.EON, 0, 1, 2, [0.8, 0.10, 0.10], [8]),
 ]
 
 def calculator(current_actions, battery_drop_cost, discount, current_values, y, x):
@@ -18,12 +18,12 @@ def calculator(current_actions, battery_drop_cost, discount, current_values, y, 
     for i in range(4):
         current_action, left_action, right_action = current_actions[i], current_actions[(i - 1) % 4], current_actions[(i + 1) % 4]
         choices = [current_action, left_action, right_action]
-        policy, _, _, _, prob, rank = current_actions[i]
+        policy, _, _, _, prob, _ = current_actions[i]
 
         expected_value = 0
 
         for p, action in zip(prob, choices):
-            _, dy, dx, mulitplier, _, rank = action
+            _, dy, dx, mulitplier, _, _ = action
             next_x, next_y = x + dx, y + dy
 
             if 0 <= next_x < 6 and 0 <= next_y < 6:
@@ -31,16 +31,16 @@ def calculator(current_actions, battery_drop_cost, discount, current_values, y, 
             else:
                 expected_value += p * (-battery_drop_cost * mulitplier + discount * current_values[y][x])
 
-        analyzer.append([expected_value, rank, policy])
+        analyzer.append([expected_value, policy])
 
     return analyzer
 
 def best_move(battery_drop_cost, discount, current_values, y, x):
     analyzer = calculator(actions, battery_drop_cost, discount, current_values, y, x) + calculator(special_actions, battery_drop_cost, discount, current_values, y, x)
 
-    analyzer.sort(key=lambda x: (-x[0], x[1][0], x[1][1]))
+    analyzer.sort(key=lambda x: (-x[0], x[1]))
     
-    return analyzer[0][0], analyzer[0][2]
+    return analyzer[0][0], analyzer[0][1]
 
 def find_delta(values, new_values):
     delta = float("-inf")
@@ -51,6 +51,13 @@ def find_delta(values, new_values):
 
 def drone_flight_planner(map, policies, values, delivery_fee, battery_drop_cost, dronerepair_cost, discount):
     current_values = list(values)
+
+    for y in range(6):
+        for x in range(6):
+            if map[y][x] == common.constants.RIVAL:
+                current_values[y][x] = -dronerepair_cost
+            elif map[y][x] == common.constants.CUSTOMER:
+                current_values[y][x] = delivery_fee
 
     def bellman_update(current_values):
         new_values = [[0 for _ in range(6)] for _ in range(6)]
@@ -70,7 +77,7 @@ def drone_flight_planner(map, policies, values, delivery_fee, battery_drop_cost,
 
         return new_values
 
-    epsilon = 0.0000000000001
+    epsilon = 0.001
     while True:
         new_values = bellman_update(current_values)
         delta = find_delta(current_values, new_values)
@@ -86,3 +93,5 @@ def drone_flight_planner(map, policies, values, delivery_fee, battery_drop_cost,
                 result = values[y][x]
 
     return result
+
+import common
