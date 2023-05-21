@@ -1,27 +1,33 @@
 import common
 
+def part_one_classifier(training_data, test_data):
+    weights, bias = [0.0 for _ in range(common.constants.DATA_DIM)], 0.0
+    
+    for _ in range(1000):  
+        for x in training_data:
+            y = x[common.constants.DATA_DIM]
+            pred = sum(weights[i] * x[i] for i in range(common.constants.DATA_DIM)) + bias > 0 
+            if pred != y:
+                for i in range(common.constants.DATA_DIM):
+                    weights[i] += (y - pred) * x[i]
+                bias += y - pred
+    
+    for x in test_data:
+        x[common.constants.DATA_DIM] = sum(weights[i] * x[i] for i in range(common.constants.DATA_DIM)) + bias > 0
 
-def part_one_classifier(data_train, data_test):
-	# PUT YOUR CODE HERE
-	# Access the training data using "data_train[i][j]"
-	# Training data contains 3 cols per row: X in 
-	# index 0, Y in index 1 and Class in index 2
-	# Access the test data using "data_test[i][j]"
-	# Test data contains 2 cols per row: X in 
-	# index 0 and Y in index 1, and a blank space in index 2 
-	# to be filled with class
-	# The class value could be a 0 or a 1
-	return
+def part_two_classifier(training_data, test_data):
+    weights = [[0.0 for _ in range(common.constants.DATA_DIM)] for _ in range(common.constants.NUM_CLASSES)]
 
-
-def part_two_classifier(data_train, data_test):
-	# PUT YOUR CODE HERE
-	# Access the training data using "data_train[i][j]"
-	# Training data contains 3 cols per row: X in 
-	# index 0, Y in index 1 and Class in index 2
-	# Access the test data using "data_test[i][j]"
-	# Test data contains 2 cols per row: X in 
-	# index 0 and Y in index 1, and a blank space in index 2 
-	# to be filled with class
-	# The class value could be a 0 or a 8
-	return
+    for _ in range(1000): 
+        for x in training_data:
+            y = int(x[common.constants.DATA_DIM])
+            dp = [sum(weights[i][j] * x[j] for j in range(common.constants.DATA_DIM)) for i in range(common.constants.NUM_CLASSES)]
+            prediction = dp.index(max(dp))
+            if prediction != y:
+                for i in range(common.constants.DATA_DIM):
+                    weights[y][i] += x[i]
+                    weights[prediction][i] -= x[i]
+    
+    for x in test_data:
+        dp = [sum(weights[i][j] * x[j] for j in range(common.constants.DATA_DIM)) for i in range(common.constants.NUM_CLASSES)]
+        x[common.constants.DATA_DIM] = dp.index(max(dp))
