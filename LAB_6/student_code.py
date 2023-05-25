@@ -1,5 +1,8 @@
 import common
 
+def truncate(n, p):
+    return int(n * 10**p) / 10**p
+
 actions = [
     (common.constants.SOFF, 1, 0, 1, [0.7, 0.15, 0.15], [1]),
     (common.constants.WOFF, 0, -1, 1, [0.7, 0.15, 0.15], [2]),
@@ -31,7 +34,7 @@ def calculator(current_actions, battery_drop_cost, discount, current_values, y, 
             else:
                 expected_value += p * (-battery_drop_cost * mulitplier + discount * current_values[y][x])
 
-        analyzer.append([expected_value, policy])
+        analyzer.append([truncate(expected_value, 6), policy])
 
     return analyzer
 
@@ -77,7 +80,7 @@ def drone_flight_planner(map, policies, values, delivery_fee, battery_drop_cost,
 
         return new_values
 
-    epsilon = 0.001
+    epsilon = 1e-5
     while True:
         new_values = bellman_update(current_values)
         delta = find_delta(current_values, new_values)
@@ -93,5 +96,3 @@ def drone_flight_planner(map, policies, values, delivery_fee, battery_drop_cost,
                 result = values[y][x]
 
     return result
-
-import common

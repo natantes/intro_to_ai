@@ -61,8 +61,6 @@ def check_circles ( title, filename, c_gold):
 		success = False
 	print 
 	return success
-
-
 	
 all_passed = True
 
@@ -77,6 +75,11 @@ all_passed = check_circles("Circles 1","../circ1.ppm",1) & all_passed
 all_passed = check_circles("Circles 2","../circ2.ppm",3) & all_passed
 all_passed = check_circles("Circles 3","../circ3.ppm",5) & all_passed
 all_passed = check_circles("Circles 4","../test1.ppm",0) & all_passed
+all_passed = check_circles("Circles 4","../new.ppm",4) & all_passed
+all_passed = check_circles("Circles 4","../new1.ppm",7) & all_passed
+all_passed = check_circles("Circles 4","../new2.ppm",5) & all_passed
+all_passed = check_circles("Circles 4","../new3.ppm",5) & all_passed
+all_passed = check_circles("Circles 4","../new4.ppm",5) & all_passed
 
 
 
